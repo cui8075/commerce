@@ -1,0 +1,84 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    {% endif %}
+   
+    <h3>Listing: {{ listing.title.capitalize }} </h3>
+    {% if listing.image_url %}
+    <br>
+    <img src="{{ listing.image_url }}" style="width:300px;">
+    <br>
+    {% endif %}
+    {{ listing.description }}
+    <br>
+    <br>
+    <h4>${{ listing.price }}</h4>
+    {% if user.is_authenticated %}
+    <form action="{% url 'bid' listing.id %}" method="post">
+        {% csrf_token %}
+        {{ bid_form }}
+        <br>
+        <input type="submit" value="Place Bid" class="btn btn-primary">
+    </form>
+    {% endif %}
+    <br>
+    <h4>Details</h4>
+    <li>Listed by: {{ listing.creator }}</li>
+    <li>category:{{ listing.get_category_display }}</li>
+    <br>
+    {% if user.is_authenticated %}
+
+    <form action="{% url 'comment' listing.id %}" method="post">
+        {% csrf_token %}
+        {{ comment }}
+        <br>
+        <input type="submit" class="btn btn-primary">
+    </form>
+    <br>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if watched %}
+            <a href="{% url 'unwatch' listing.id %}">Remove from watchlist</a>
+            
+        {% else %}
+            <a href="{% url 'watch' listing.id %}">Add to watchlist</a>
+        {% endif %}
+    {% endif %}
+    <br>
+    <br>
+    {% if comments %}
+        <h4>Comments</h4>
+        {% for comment in comments %}
+           " {{ comment.content}} "
+            ——comment by {{ comment.user}}
+            <br>
+        {% endfor %}
+    {% endif %}
+    <br>
+    {% if listing.status == True %}
+        {% if user == listing.creator %}
+            <h5><a href="{% url 'close' listing.id %}">Close This Bid</a></h5>
+        {% endif %}
+    {% else %}
+        This bid is closed.
+        
+        {% if user == listing.winner %}
+            <br>
+            <h5>You <span style="color:red;">win</span> this bid!</h5>
+        {% else %}
+            
+                {% if listing.winner %}
+                    <h6>win by: {{ listing.winner }}</h6>
+                {% else %}
+                    <h6>no body bid for this closed item.</h6>
+                {% endif %}
+        {% endif %}
+    {% endif %}
+
+    
+
+{% endblock %}
